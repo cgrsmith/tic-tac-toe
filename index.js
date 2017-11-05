@@ -95,12 +95,15 @@ class Game {
 
 class TicTacToeAI {
     miniMax(newState, player) {
-        if (newState.checkWin() && player === 1) return {score: -10};
-        if (newState.checkWin() && player === 2) return {score: 10};
+        //If player = 1, then player = 2 won last round
+        if (newState.checkWin() && player === 1) return {score: 10};
+        if (newState.checkWin() && player === 2) return {score: -10};
         if (newState.freeSpaces().length === 0) return {score: 0};
+
         let nextPlayer = (player === 1) ? 2 : 1;
         let availSpaces = newState.freeSpaces();
         let moves = [];
+        
         for (let space in availSpaces) {
             let move = {};
             move.space = availSpaces[space];
@@ -110,8 +113,8 @@ class TicTacToeAI {
             moves.push(move);
             newState.clearSpace(move.space);
         }
-
-        if (player === 2) {
+        
+        if (player === 1) {
             return moves.reduce(function(minObj, nextObj) {
                 return (nextObj.score < minObj.score) ? nextObj : minObj;
             });
@@ -192,10 +195,5 @@ class GameState {
 //     testGame.playerMove(3); //test cant move to occupied space
 //     console.log(testGame.curPlayer === 2);
 //     //AI test
-    const testGame = new Game("ai", 1);
-    let testState = new GameState([1,1,1,2,2,0,0,0,0])
-    console.log(testState);
-    let testAI = new TicTacToeAI();
-    console.log(testAI.aiMove(testState));
 })();
 
