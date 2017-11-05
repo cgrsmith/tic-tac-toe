@@ -94,9 +94,37 @@ class Game {
 }
 
 class TicTacToeAI {
+    miniMax(newState, player) {
+        if (newState.checkWin() && player === 1) return {score: -10};
+        if (newState.checkWin() && player === 2) return {score: 10};
+        if (newState.freeSpaces().length === 0) return {score: 0};
+        let nextPlayer = (player === 1) ? 2 : 1;
+        let availSpaces = newState.freeSpaces();
+        let moves = [];
+        for (let space in availSpaces) {
+            let move = {};
+            move.space = availSpaces[space];
+            newState.makeMove(move.space, player);
+            let result = this.miniMax(newState, nextPlayer);
+            move.score = result.score;
+            moves.push(move);
+            newState.clearSpace(move.space);
+        }
+
+        if (player === 2) {
+            return moves.reduce(function(minObj, nextObj) {
+                return (nextObj.score < minObj.score) ? nextObj : minObj;
+            });
+        } else {
+            return moves.reduce(function(maxObj, nextObj) {
+                return (nextObj.score > maxObj.score) ? nextObj : maxObj;
+            });
+        }
+
+    }
 
     aiMove(state) {
-        return state.freeSpaces()[0];
+        return this.miniMax(state, 2).space;
     }
 
 }
@@ -132,35 +160,42 @@ class GameState {
     validSpace(move) {
         return (this.freeSpaces(this.state).indexOf(move) === -1) ? false : true;
     }
+    clearSpace(move) {
+        this.state[move] = 0;   
+    }
     reset() {
         this.state = [0,0,0,0,0,0,0,0,0];
     }
 }
 
 (function test() {
+//     const testGame = new Game("ai", 1);
+//     console.log("Testing");
+//     //GameState test
+//     console.log("---GameState");
+//     console.log(testGame.gameState.validSpace(2) === true);
+//     testGame.gameState.makeMove(2, 1);
+//     console.log(testGame.gameState.validSpace(2) === false);
+//     testGame.gameState.makeMove(2, 2);
+//     console.log(testGame.gameState.state[2] !== 2);
+//     testGame.gameState.reset();
+//     //Game test
+//     console.log("---Game");
+//     console.log(testGame.curPlayer === 1);
+//     testGame.playerMove(0); //test a human can move
+//     console.log(testGame.curPlayer === 1);
+//     testGame.playerMove(1); //AI has moved
+//     console.log(testGame.curPlayer === 1);
+//     testGame.playerTwo = "human"; //Switch to human
+//     testGame.playerMove(3); //check player 2 can move manually if a human
+//     console.log(testGame.curPlayer === 2);
+//     testGame.playerMove(3); //test cant move to occupied space
+//     console.log(testGame.curPlayer === 2);
+//     //AI test
     const testGame = new Game("ai", 1);
-    console.log("Testing");
-    //GameState test
-    console.log("---GameState");
-    console.log(testGame.gameState.validSpace(2) === true);
-    testGame.gameState.makeMove(2, 1);
-    console.log(testGame.gameState.validSpace(2) === false);
-    testGame.gameState.makeMove(2, 2);
-    console.log(testGame.gameState.state[2] !== 2);
-    testGame.gameState.reset();
-    //Game test
-    console.log("---Game");
-    console.log(testGame.curPlayer === 1);
-    testGame.playerMove(0); //test a human can move
-    console.log(testGame.curPlayer === 1);
-    testGame.playerMove(1); //AI has moved
-    console.log(testGame.curPlayer === 1);
-    testGame.playerTwo = "human"; //Switch to human
-    testGame.playerMove(3); //check player 2 can move manually if a human
-    console.log(testGame.curPlayer === 2);
-    testGame.playerMove(3); //test cant move to occupied space
-    console.log(testGame.curPlayer === 2);
-    //AI test
-
+    let testState = new GameState([1,1,1,2,2,0,0,0,0])
+    console.log(testState);
+    let testAI = new TicTacToeAI();
+    console.log(testAI.aiMove(testState));
 })();
 
