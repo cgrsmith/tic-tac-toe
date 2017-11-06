@@ -3,6 +3,7 @@ $(document).ready(function() {
     let gameType = "ai";
     let gameStarter = 1;
     $(".tile").prop("disabled", true);
+    $("#resultBox").hide();
 
     $("#startButton").click(function() {
         game = new Game(gameType, gameStarter);
@@ -18,10 +19,10 @@ $(document).ready(function() {
         $(this).addClass("selected");
         $(this).siblings().removeClass("selected");
         if (gameType === "human") {
-            $(".gameStarter").hide();
+            $(".gameStarter").css('visibility', 'hidden');
             $("#default").click()
         } else {
-            $(".gameStarter").show();
+            $(".gameStarter").css('visibility', 'visible');
         }
     });
 
@@ -46,8 +47,9 @@ class Game {
         this.gameOver = false;
     }
     start() {
-        $("h1").html("Tic-Tac-Toe");
         $(".tile").prop("disabled", false);
+        $(".tile").removeClass("winTile");
+        $("#resultBox").hide();
         this.updateBoard();
         if (this.curPlayer === 2) this.aiGo();
     }
@@ -80,13 +82,27 @@ class Game {
                 $("#"+tile).html("");
             }
         }
-        if (this.gameState.checkWin()) {
-            this.winner();
+        let winState = this.gameState.checkWin();
+        if (winState.win) {
+            this.winner(winState);
+        } else if(this.gameState.freeSpaces().length === 0) {
+            this.tie();
         }
     }
 
-    winner(player) {
-        $("h1").html("Player " +this.curPlayer +" wins");
+    tie() {
+        $("#resultBox").show()
+        $("#resultBox").html("It's a Tie!");
+        $(".tile").prop("disabled", true);
+        this.gameOver = true;
+    }
+
+    winner(winState) {      
+        for (let i in winState.spaces) {
+            $("#"+ winState.spaces[i]).addClass("winTile");
+        }
+        $("#resultBox").show()
+        $("#resultBox").html("Player " +this.curPlayer +" wins");
         $(".tile").prop("disabled", true);
         this.gameOver = true; //Stops AI going if player won
     }
@@ -96,8 +112,8 @@ class Game {
 class TicTacToeAI {
     miniMax(newState, player) {
         //If player = 1, then player = 2 won last round
-        if (newState.checkWin() && player === 1) return {score: 10};
-        if (newState.checkWin() && player === 2) return {score: -10};
+        if (newState.checkWin().win && player === 1) return {score: 10};
+        if (newState.checkWin().win && player === 2) return {score: -10};
         if (newState.freeSpaces().length === 0) return {score: 0};
 
         let nextPlayer = (player === 1) ? 2 : 1;
@@ -144,14 +160,18 @@ class GameState {
     checkWin() {
         for (let i = 0; i <= 2; i++) {
             //accross
-            if (this.state[0+i*3] === this.state[1+i*3] && this.state[1+i*3] === this.state[2+i*3] && this.state[0+i*3] !== 0) return true;    
+            if (this.state[0+i*3] === this.state[1+i*3] && this.state[1+i*3] === this.state[2+i*3] && 
+                this.state[0+i*3] !== 0) return {spaces:[0+i*3,1+i*3,2+i*3], win: true};    
             //down
-            if (this.state[0+i] === this.state[3+i] && this.state[3+i] === this.state[6+i] && this.state[0+i] !== 0) return true;
+            if (this.state[0+i] === this.state[3+i] && this.state[3+i] === this.state[6+i] && 
+                this.state[0+i] !== 0) return {spaces:[0+i,3+i,6+i], win: true};
         }
         //diagonal
-        if (this.state[0] === this.state[4] && this.state[4] === this.state[8] && this.state[0] !== 0) return true;
-        if (this.state[2] === this.state[4] && this.state[4] === this.state[6] && this.state[2] !== 0) return true;
-        return false;
+        if (this.state[0] === this.state[4] && this.state[4] === this.state[8] && 
+            this.state[0] !== 0) return {spaces:[0,4,8], win: true};
+        if (this.state[2] === this.state[4] && this.state[4] === this.state[6] && 
+            this.state[2] !== 0) return {spaces:[2,4,6], win: true};
+        return {win: false};
     }
     freeSpaces() {
         let spaces = [];
