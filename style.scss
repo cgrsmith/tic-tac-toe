@@ -1,38 +1,91 @@
 $game-width: 400px;
+$tile-margin: 1.5%;
 
+$font-color: #333;
+$bg-color: #EEE;
+
+* {
+    font-family: sans-serif;
+    color: $font-color;
+    background-color: $bg-color;
+}
+
+button {
+    background: none;
+    &:focus{
+        outline: none;
+    }
+}
 
 .game {
 
     width: $game-width; max-width: 90%;
-    margin: auto;
+    margin: auto; margin-top: 40px;
+    padding: $tile-margin;
+
     header {
-        width: 100%; height: 50px;
+        height: 50px;
         display: flex;
         flex-direction: row;
         justify-content: space-between;
+        margin: 20px 0;
+        h1 {
+            align-self: flex-start;
+            margin: 0;
+            margin-left: $tile-margin;
+            border: solid $font-color 1px;
+            box-shadow: -1px 1px 5px $font-color;
+            height: 100%; line-height: 50px;
+            padding: 0 12px;
+        }
+        button {
+            box-shadow: -1px 1px 3px $font-color;
+            border: solid $font-color 1px;
+            &:active {
+                box-shadow: none;
+            }
+        }
         .switch {
             display: flex;
             flex-direction: column;
+            .switchButton {
+                height: 50%;
+                
+            }
             .selected {
-                background-color: red;
+                background-color: rgb(253, 106, 106);
+                box-shadow: -1px 1px 3px $font-color inset;
             }
         }
-
+        #startButton {
+            margin-right: $tile-margin;
+        }
     }
     .board {
         display: flex;
         flex-flow: row wrap;
+        justify-content: space-between;
         height: $game-width;
+        margin: auto;
         .tile {
-            width: 31%; height: 31%;
-            margin: 1%;
+            width: 30%; height: 30%;
+            margin: $tile-margin;
+            font-size: 3em;
+            border: solid $font-color 1px;
+            box-shadow: -1px 1px 5px $font-color;
         }
         .winTile {
-            background-color: black;
+            background-color: $font-color;
+            color: $bg-color;
         }
         .resultBox {
-            position: relative; top: -$game-width/2; margin: auto;
-            background-color: white;
+            position: relative; top: -$game-width*(5/8); margin: auto;
+            width: $game-width*(5/8); height: $game-width/4;
+            background-color: $bg-color;
+            border: solid $font-color 1px;
+            text-align: center; line-height: $game-width/4;
+            font-size: 2em;
+            box-shadow: -1px 1px 5px $font-color;
         }
     }
 }
