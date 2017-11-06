@@ -1,18 +1,22 @@
 $(document).ready(function() {
     let game;
+    //Default Options
     let gameType = "ai";
     let gameStarter = 1;
     $(".tile").prop("disabled", true);
 
+    //Start creates a new Game object and starts the game
     $("#startButton").click(function() {
         game = new Game(gameType, gameStarter);
         game.start();
     });
 
+    //Tiles always send their move to Game, Game decides if valid
     $(".tile").click(function() {
         game.playerMove(parseInt($(this).val()), $(this));
     });
 
+    //Select human or ai opponent
     $(".gameType").click(function() {
         gameType = $(this).val();
         $(this).addClass("selected");
@@ -25,6 +29,7 @@ $(document).ready(function() {
         }
     });
 
+    //If AI opponent, chose first player
     $(".gameStarter").click(function() {
         gameStarter = parseInt($(this).val());
         $(this).addClass("selected");
@@ -32,26 +37,31 @@ $(document).ready(function() {
     });
 });
 
-
-
+/*  Game handles game flow and governs all interations with Document
+    Has subordinate AI and GameState objects that do not direectly interact
+*/  
 class Game {
     constructor(oppType, startPlayer) {
         this.curPlayer = startPlayer;
         this.playerTwo = oppType;
 
+        //Game stores the state and ai
         this.gameState = new GameState();
         this.AI = new TicTacToeAI();
 
+        //Human player 1 is always curPlayer 1, its the symbols that change 
         this.playerSymbols = (this.curPlayer === 1) ? ["X","O"] : ["O","X"];
         this.gameOver = false;
     }
     start() {
-        $("h1").html("Tic-Tac-Toe");
+        //Enable board, update clear board in case of reset, if ai going first, tell it to.
         $(".tile").prop("disabled", false);
         this.updateBoard();
         if (this.curPlayer === 2) this.aiGo();
     }
 
+    //If a tile has sent its value to the game, and it is a valid move on the correct turn,
+    // make the move. If game against AI, tell it to take its turn (if game not over)
     playerMove(move) {
         if (this.curPlayer === 1 || (this.curPlayer === 2 && this.playerTwo === "human")) {
             if (this.gameState.validSpace(move)) {         
@@ -65,13 +75,16 @@ class Game {
         }
     }
 
+    //AI object determines a move, Game acts on it
     aiGo() {
-        let aiMove = this.AI.aiMove(this.gameState);
+        let cloneState = new GameState(this.gameState.state);
+        let aiMove = this.AI.aiMove(cloneState);
         this.gameState.makeMove(aiMove, this.curPlayer);
         this.updateBoard();
         this.curPlayer = 1;
     }
 
+    //Updates the board and checks end result
     updateBoard() {
         for (let tile in this.gameState.state) {
             if (this.gameState.state[tile] !== 0) {
@@ -92,7 +105,8 @@ class Game {
     }
 
 }
-
+/*  TicTacToeAI is uses the minimax algorithm to determine a move to send to the Game
+*/
 class TicTacToeAI {
     miniMax(newState, player) {
         //If player = 1, then player = 2 won last round
@@ -131,7 +145,9 @@ class TicTacToeAI {
     }
 
 }
-
+/*  GameState handles storing the state and any modifications to it. 
+    Also determines valid moves and checks win conditions.
+*/
 class GameState {
     constructor(startState = [0,0,0,0,0,0,0,0,0]) {
         this.state = startState;
